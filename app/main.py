@@ -1,8 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from app.repository import TaskRepository
 from app.models import Task, TaskCreate, TaskUpdate
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://refactored-umbrella-4jw99977qq442qq67-8000.app.github.dev",  # Allows all Codespaces URLs
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 repo = TaskRepository()
 
 def get_repo():
