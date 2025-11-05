@@ -9,10 +9,10 @@ A production-ready, modular, and fully tested to-do list backend using FastAPI a
 - Clean, extensible architecture
 - Fully tested with `pytest`
 
-## Setup
+## Local Setup
 
 ```bash
-git clone <YOUR_REPO_URL>
+git clone https://github.com/kkalchake/todo-backend.git
 cd todo-backend
 python3 -m venv venv
 source venv/bin/activate
