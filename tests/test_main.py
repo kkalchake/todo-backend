@@ -1,46 +1,51 @@
-import pytest
-from fastapi.testclient import TestClient
-from app.main import app, get_repo
-from app.repository import TaskRepository
-from pathlib import Path
+def test_create_task(client):
+    """
+    Test creating a new task successfully.
+    """
+    response = client.post("/tasks/", json={"title": "Write tests", "description": "Phase 2 QA"})
+    assert response.status_code == 201
+    data = response.json()
+    assert data["title"] == "Write tests"
+    assert data["description"] == "Phase 2 QA"
+    assert data["status"] == "PENDING"
+    assert "id" in data
+    assert "created_at" in data
 
-TEST_FILE = "taskstest.json"
 
-@pytest.fixture(autouse=True)
-def cleanup():
-    Path(TEST_FILE).unlink(missing_ok=True)
+def test_list_tasks(client):
+    """
+    Test listing all tasks. Ensures test isolation.
+    """
+    # Create 2 tasks *for this test*
+    client.post("/tasks/", json={"title": "Task A"})
+    client.post("/tasks/", json={"title": "Task B"})
 
-@pytest.fixture(autouse=True)
-def override_repo():
-    repo = TaskRepository(TEST_FILE)
-    app.dependency_overrides[get_repo] = lambda: repo
-    yield
-    app.dependency_overrides = {}
+    response = client.get("/tasks/")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    # Because tests are isolated, we can be precise
+    assert len(data) == 2
+    assert any(task["title"] == "Task A" for task in data)
 
-client = TestClient(app)
 
-def test_create_and_list_task():
-    resp = client.post("/tasks", json={"title": "Test", "description": "Desc"})
-    assert resp.status_code == 201
-    data = resp.json()
-    assert data["title"] == "Test"
-    resp = client.get("/tasks")
-    assert resp.status_code == 200
-    assert len(resp.json()) == 1
+def test_update_task(client):
+    """
+    Test updating an existing task.
+    """
+    create = client.post("/tasks/", json={"title": "Original Title"})
+    task_id = create.json()["id"]
 
-def test_delete_task():
-    resp = client.post("/tasks", json={"title": "ToDelete"})
-    task_id = resp.json()["id"]
-    resp = client.delete(f"/tasks/{task_id}")
-    assert resp.status_code == 204
-    resp = client.get("/tasks")
-    assert resp.json() == []
+    response = client.put(f"/tasks/{task_id}", json={"title": "Updated Title", "status": "COMPLETED"})
+    assert response.status_code == 200
+    updated = response.json()
+    assert updated["title"] == "Updated Title"
+    assert updated["status"] == "COMPLETED"
 
-def test_update_task():
-    resp = client.post("/tasks", json={"title": "ToUpdate"})
-    task_id = resp.json()["id"]
-    resp = client.put(f"/tasks/{task_id}", json={"title": "Updated", "status": "COMPLETED"})
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["title"] == "Updated"
-    assert data["status"] == "COMPLETED"
+
+def test_delete_task(client):
+    """
+    Test deleting an existing task.
+    """
+    create = client.post("/tasks/", json={"title": "To Be Deleted"})
+    task_id = create.json

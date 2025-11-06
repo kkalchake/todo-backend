@@ -1,13 +1,21 @@
-# FastAPI To-Do Backend
+# Todo Backend API
 
-A production-ready, modular, and fully tested to-do list backend using FastAPI and Python.
+A modular and extensible backend for managing tasks using FastAPI, SQLAlchemy, and Pydantic. 
+Built with intention for a clean architecture for testability, maintainability, and future production readiness.
 
 ## Features
 
-- RESTful API: Create, list, update, and delete tasks
-- File-based persistence (`tasks.json`)
-- Clean, extensible architecture
-- Fully tested with `pytest`
+- FastAPI-based REST API
+- SQLAlchemy ORM with Pydantic validation
+- Layered architecture with service and repository abstraction
+- In-memory SQLite test database for fast and isolated testing
+- Automated tests using Pytest
+
+## Requirements
+
+- Python 3.11 or higher
+- pip (Python package manager)
+- Optional: virtualenv
 
 ## Local Setup
 
@@ -15,31 +23,53 @@ A production-ready, modular, and fully tested to-do list backend using FastAPI a
 git clone https://github.com/kkalchake/todo-backend.git
 cd todo-backend
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate # For Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 ## Running the API
+```bash
 uvicorn app.main:app --reload
-API will be available at http://127.0.0.1:8000 
+Server will be available at:
+
+Base URL: http://localhost:8000
 
 ## API Endpoints
-POST /tasks — Add a new task
-GET /tasks — List all tasks
+POST /tasks — Create a new task
+GET /tasks — Retrieve all tasks
 PUT /tasks/{id} — Update a task
 DELETE /tasks/{id} — Delete a task
 
 ## Running Tests
+```bash
 pytest or PYTHONPATH=. pytest
 
-## Project Structure
-app/models.py — Data models
-app/repository.py — Persistence layer
-app/main.py — API routes
-tests/ — Unit tests
+## Generate coverage report:
+```bash
+pip install pytest-cov
+pytest --cov=app tests/
 
-## API Testing
-You can use Postman or CLI to interact with the API.
+## Task Object Format
+{
+  "id": "uuid",
+  "title": "Task title",
+  "description": "Optional details",
+  "status": "PENDING",
+  "created_at": "2025-11-05T18:55:00Z",
+  "updated_at": "2025-11-05T18:55:00Z"
+}
 
+## Manual Functional Testing
+Example with curl:
+```bash
+curl -X POST http://localhost:8000/tasks/ \
+     -H "Content-Type: application/json" \
+     -d '{"title": "Test task", "description": "Manual test"}'
+
+To verify:
+```bash
+curl http://localhost:8000/tasks/
+
+-------------------------------------
 1. Create a Task
 Method: POST
 URL: http://127.0.0.1:8000/tasks
@@ -69,3 +99,17 @@ Method: DELETE
 URL: http://127.0.0.1:8000/tasks/{id}
 Replace {id} with the actual task ID from the list endpoint.
 
+## Collaboration: Dockerization and CI/CD
+Docker and CI/CD are not yet implemented.
+
+Suggested enhancements for collaborators:
+
+Add a Dockerfile to containerize the FastAPI backend
+
+Add a docker-compose.yml for backend + PostgreSQL integration
+
+Implement GitHub Actions for automated testing and build verification
+
+Prepare deployment configuration for Render, Fly.io, or AWS ECS
+
+Developers are encouraged to fork the repository, create feature branches, and open pull requests with detailed descriptions.
